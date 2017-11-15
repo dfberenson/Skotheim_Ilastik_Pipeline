@@ -15,8 +15,8 @@ def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     import numpy as np
     
     times = dataframe.index
-    xcoords = dataframe.xs((cellnum,'CentroidX'), level=('cell number','measurement'), axis=1)
-    ycoords = dataframe.xs((cellnum,'CentroidY'), level=('cell number','measurement'), axis=1)
+    xcoords = dataframe.xs((cellnum,'CentroidX'), level=('cell number','measurement'), axis='columns')
+    ycoords = dataframe.xs((cellnum,'CentroidY'), level=('cell number','measurement'), axis='columns')
     
     plt.figure()
     plt.axis([0,xlim,0,ylim])
