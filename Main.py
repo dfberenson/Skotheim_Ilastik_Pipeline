@@ -17,7 +17,7 @@ import copy
 start_time = time.clock()
 expt = Experiment('Test')
 
-print('\nConstructing dataframe...\n')
+print('\nConstructing data frame...\n')
 expt.construct_dataframe()
 print('\nTotal time elapsed (s): ')
 print (int(time.clock() - start_time))
