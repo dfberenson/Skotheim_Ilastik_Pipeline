@@ -13,44 +13,72 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import copy
+import pickle
+
 
 start_time = time.clock()
-expt = Experiment('Test')
+
+print('\nRelabeling manually tracked cell...\n')
+relabeled_track_path = relabelManualTrack(r'E:\Ilastik Tracking\Tracking_Better.tiff',1000)
+print('\nTotal time elapsed (s): ')
+print (int(time.clock() - start_time))
+
+expt = Experiment('Test',tracked_filename = relabeled_track_path)
 
 print('\nConstructing data frame...\n')
 expt.construct_dataframe()
 print('\nTotal time elapsed (s): ')
 print (int(time.clock() - start_time))
 
+known_df = expt.df
 c = copy.deepcopy(expt)
-#expt = copy.deepcopy(c)
+'''
+expt = copy.deepcopy(c)
+expt = Experiment('Test')
+expt.assign_dataframe(known_df)
+'''
 
-print('\nCalculating smoothening...\n')
+print('\nSmoothening channel 1...\n')
 expt.smoothen('NetIntegratedIntensity_Chan1')
-print('\nTotal time elapsed (s): ')
+print('Total time elapsed (s): ')
+print (int(time.clock() - start_time))
+
+print('\nSmoothening channel 2...\n')
+expt.smoothen('NetIntegratedIntensity_Chan2')
+print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating speed...\n')
 expt.calculate_speed()
-print('\nTotal time elapsed (s): ')
+print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating neighbors...\n')
 expt.calculate_num_neighbors(100)
-print('\nTotal time elapsed (s): ')
+print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating derivative...\n')
 expt.calculate_derivative('NetIntegratedIntensity_Chan1')
-print('\nTotal time elapsed (s): ')
+print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating relative derivative...\n')
 expt.calculate_relative_derivative('NetIntegratedIntensity_Chan1')
-print('\nTotal time elapsed (s): ')
+print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
+saved_filename = r'E:\Ilastik Tracking\SavedData.pickle'
+
+with open(saved_filename,'wb') as f:
+    pickle.dump(expt,f)
+
 '''
+with open(saved_filename,'rb') as f:
+    prev_expt = pickle.load(f)
+'''
+
+"""
 ToDo:
 Run Ilastik in headless mode:
 http://ilastik.org/documentation/basics/headless.html
@@ -59,8 +87,7 @@ https://github.com/ilastik/ilastik/issues/1519
 Import lineage data from ilastik
 Construct lineage traces using something like Experiment.get_stitched_tracks()
 Generate plots
-
-'''
+"""
 
 
 

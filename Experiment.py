@@ -8,10 +8,13 @@ Created on Tue Nov 14 13:30:09 2017
 class Experiment(object):
     
     def __init__(self,expt_name, micrograph_filename = r'E:\Ilastik Tracking\TestImage.tif',
-                        tracked_filename = r'E:\Ilastik Tracking\Tracking_2.tiff'):
+                        tracked_filename = r'E:\Ilastik Tracking\Tracking_Better.tiff'):
         self.expt_name = expt_name
         self.micrograph_filename = micrograph_filename
         self.tracked_filename = tracked_filename
+        
+    def assign_dataframe(self, known_df):
+        self.df = known_df
 
     def construct_dataframe(self):
         '''
@@ -40,7 +43,10 @@ class Experiment(object):
         
         #Get list of all cells and timepoints
         highest_num_cell = np.max(tracked_stack)
-        all_cellnums = np.arange(1,highest_num_cell + 1)
+        
+        #all_cellnums = np.arange(1,highest_num_cell + 1)    ##ASSUMES CELLS ARE NUMBERED 1,2,3,...,max
+        
+        all_cellnums = np.unique(tracked_stack)
         all_timepoints = np.arange(0,T)
 #        all_timepoints = np.arange(0,4)
         
@@ -142,16 +148,16 @@ class Experiment(object):
     
     def smoothen(self,measurement_name,window_radius=2):
         cells = self.df.columns.get_level_values('cell number').unique()
-        self.add_measurement('Smoothened ' + measurement_name)
+        smooth_name = 'Smoothened ' + measurement_name
+        self.add_measurement(smooth_name)
         for cell in cells:
-            for t in data.index:
+            for t in self.df.index:
                 if t < window_radius:
-                    self.df.loc[t] = self.df.loc[0:t+window_radius,(cell,measurement_name)]
-                elif t > max(data.index):
-                    self.df.loc[t] = self.df.loc[t-window_radius:max(data.index),(cell,measurement_name)]
+                    self.df.loc[t,(cell,smooth_name)] = self.df.loc[0:t+window_radius,(cell,measurement_name)].mean()
+                elif t > max(self.df.index):
+                    self.df.loc[t,(cell,smooth_name)] = self.df.loc[t-window_radius:max(self.df.index),(cell,measurement_name)].mean()
                 else:
-                    self.df.loc[t] = self.df.loc[t-window_radius:t+window_radius,(cell,measurement_name)]
-        self.add_measurement('Smoothened ' + measurement_name)
+                    self.df.loc[t,(cell,smooth_name)] = self.df.loc[t-window_radius:t+window_radius,(cell,measurement_name)].mean()
                     
     
     def calculate_derivative(self,measurement_name):
@@ -179,11 +185,11 @@ class Experiment(object):
                     self.df.loc[t,(cell,relative_name)] = float(d)/x
         
     def calculate_num_neighbors(self,distance):
-        name = 'Num neighbors within' + str(distance) + 'pixels'
+        name = 'Num neighbors within ' + str(distance) + ' pixels'
         cells = self.df.columns.get_level_values('cell number').unique()
         self.add_measurement(name)
         for cell in cells:
-            print(cell)
+            print('Calculating neighbors for cell ')
             for t in self.df.index:
                 home_x = self.df.loc[t,(cell,'CentroidX')]
                 home_y = self.df.loc[t,(cell,'CentroidY')]
@@ -247,7 +253,7 @@ class Experiment(object):
                 
         
         stitched_df = pd.DataFrame(self.df.index, self.df.columns)
-        for t in self.df.index[init_frames_toskip:]
+        for t in self.df.index[init_frames_toskip:]:
             row = self.df.loc[t,cell]
             stitched_df.loc[t] = row
             cell = row.loc['Next stitched ID']

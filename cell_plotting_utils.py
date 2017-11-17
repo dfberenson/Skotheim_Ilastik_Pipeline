@@ -9,6 +9,21 @@ Created on Tue Nov 07 19:12:50 2017
 #And make trace of intensity and area data
 
 
+def plot_average_value(dataframe, measurement_name):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import numpy as np
+    
+    times = dataframe.index
+    vals = dataframe.xs(measurement_name, level='measurement', axis=1)
+    avg_vals = pd.Series(index = times)
+    for t in times:
+        avg_vals.loc[t] = np.mean(vals.loc[t,2:])       #Skip cells numbered 0 and 1 (artifacts)
+
+    plt.figure()
+    plt.plot(times,avg_vals)
+    plt.show()
+
 def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -29,7 +44,7 @@ def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     plt.gca().invert_yaxis()
     
     
-def plot_intensity(cellnum, dataframe):
+def plot_intensity(cellnum, dataframe, ylim = None):
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -41,6 +56,21 @@ def plot_intensity(cellnum, dataframe):
     plt.figure()
     plt.plot(times,intens_Chan1,'r-')
     plt.plot(times,intens_Chan2,'g-')
+    axes = plt.gca()
+    axes.set_ylim(bottom = 0, top = ylim)
+    plt.show()
+
+
+def plot_variable(cellnum, dataframe, measurement_name):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import numpy as np
+    
+    times = dataframe.index
+    vals = dataframe.xs((cellnum, measurement_name), level=('cell number','measurement'), axis=1)
+
+    plt.figure()
+    plt.plot(times,vals)
     plt.show()
     
     
