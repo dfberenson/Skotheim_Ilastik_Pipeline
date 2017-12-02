@@ -61,7 +61,7 @@ class Experiment(object):
         cellsXmeasurements = pd.MultiIndex.from_product([all_cellnums,measurements_list],
                                                         names = ['cell number','measurement'])
         df = pd.DataFrame(index = all_timepoints, columns = cellsXmeasurements)
-        df.index.name = 'time'
+        df.index.name = 'frame'
         
         print('\nDataFrame Created\n')
         print ('Time elapsed (s): '),
@@ -144,6 +144,7 @@ class Experiment(object):
                 
         print ('\n\nTime for dataframe construction (s): '),
         print (int(time.clock() - start_time))
+        df.sort_index(axis = 'columns', inplace = True)
         self.df = df
     
     def smoothen(self,measurement_name,window_radius=2):
@@ -221,10 +222,10 @@ class Experiment(object):
         new_df = pd.DataFrame(index = ind, columns = pd.MultiIndex.from_product([cells,[measurement_name]],
                                                                                 names = ['cell number','measurement']))
         self.df = self.df.join(new_df)
-        self.order_columns()  
+        self.df.sort_index(axis = 'columns', inplace = True)
     
-    def order_columns(self):
-        self.df = self.df.sort_index(axis = 'columns', level = 'cell number')    
+#    def order_columns(self):
+#        self.df = self.df.sort_index(axis = 'columns', level = 'cell number')    
     
     def add_timepoints(self, new_data):
         self.df = self.df.append(new_data)    

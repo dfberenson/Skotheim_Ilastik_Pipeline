@@ -24,7 +24,7 @@ def plot_average_value(dataframe, measurement_name):
     plt.plot(times,avg_vals)
     plt.show()
 
-def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
+def plot_track_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -32,6 +32,9 @@ def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     times = dataframe.index
     xcoords = dataframe.xs((cellnum,'CentroidX'), level=('cell number','measurement'), axis='columns')
     ycoords = dataframe.xs((cellnum,'CentroidY'), level=('cell number','measurement'), axis='columns')
+    
+    #With sorted dataframe.index, can also do:
+        # measurement_timecourse = dataframe.loc[slice(None),(track,measurement)]
     
     plt.figure()
     plt.axis([0,xlim,0,ylim])
@@ -43,6 +46,10 @@ def plot_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     plt.scatter(xcoords,ycoords, c=times)
     plt.gca().invert_yaxis()
     
+
+
+
+
     
 def plot_intensity(cellnum, dataframe, ylim = None):
     import matplotlib.pyplot as plt
@@ -54,10 +61,16 @@ def plot_intensity(cellnum, dataframe, ylim = None):
     intens_Chan2 = dataframe.xs((cellnum,'IntegratedIntensity_Chan2'), level=('cell number','measurement'), axis=1)
     
     plt.figure()
-    plt.plot(times,intens_Chan1,'r-')
-    plt.plot(times,intens_Chan2,'g-')
     axes = plt.gca()
-    axes.set_ylim(bottom = 0, top = ylim)
+    axes.plot(times,intens_Chan1,'r-')
+    axes.set_xlabel('Frame')
+    axes.set_ylabel('IntegratedIntensity_Chan1',color='r')
+    axes.tick_params('y', colors='r')
+    axes2 = axes.twinx()
+    axes2.plot(times,intens_Chan2,'g-')
+    axes2.set_ylabel('IntegratedIntensity_Chan2',color='g')
+    axes2.tick_params('y', colors='g')
+
     plt.show()
 
 
