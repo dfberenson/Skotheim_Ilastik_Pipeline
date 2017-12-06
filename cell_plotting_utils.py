@@ -25,6 +25,7 @@ def plot_average_value(dataframe, measurement_name):
     plt.show()
 
 def plot_track_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
+    #cellnum is int so only one cell
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -46,10 +47,34 @@ def plot_track_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     plt.scatter(xcoords,ycoords, c=times)
     plt.gca().invert_yaxis()
     
-
-
-
-
+def plot_tracks_centroids_motions(cellnums, dataframe, xlim = 2560, ylim = 2160):
+    #cellnums is list so multiple cells
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import numpy as np
+    
+    xcoords = [None] * len(cellnums)
+    ycoords = [None] * len(cellnums)
+    
+    for n in range(len(cellnums)):
+        times = dataframe.index
+        xcoords[n] = dataframe.xs((cellnums[n],'CentroidX'), level=('cell number','measurement'), axis='columns')
+        ycoords[n] = dataframe.xs((cellnums[n],'CentroidY'), level=('cell number','measurement'), axis='columns')
+    
+    #With sorted dataframe.index, can also do:
+        # measurement_timecourse = dataframe.loc[slice(None),(track,measurement)]
+    
+    plt.figure()
+    plt.axis([0,xlim,0,ylim])
+    for n in range(len(cellnums)):
+        plt.plot(xcoords[n],ycoords[n])
+    plt.gca().invert_yaxis()
+    
+    plt.figure()
+    plt.axis([0,xlim,0,ylim])
+    for n in range(len(cellnums)):
+        plt.scatter(xcoords[n],ycoords[n], c=times)
+    plt.gca().invert_yaxis()
     
 def plot_intensity(cellnum, dataframe, ylim = None):
     import matplotlib.pyplot as plt

@@ -54,7 +54,7 @@ class Experiment(object):
         #Construct multiindexed dataframe where each row is a timepoint and each column
         #is multi-indexed with cell number and measurement type. All values set to nan.
         
-        measurements_list = ['Lifespan','Mother','Daughter1','Daughter2','CentroidX','CentroidY',
+        measurements_list = ['Lifespan','Mother','DaughterA','DaughterB','CentroidX','CentroidY',
         'Area','MeanIntensity_Chan1','IntegratedIntensity_Chan1','MeanLocalBackground_Chan1','NetIntegratedIntensity_Chan1',
         'MeanIntensity_Chan2','IntegratedIntensity_Chan2','MeanLocalBackground_Chan2','NetIntegratedIntensity_Chan2']
         
@@ -128,8 +128,8 @@ class Experiment(object):
                 thesemeasurements = df.loc[t,cell]
                 thesemeasurements['Lifespan'] = np.nan
                 thesemeasurements['Mother'] = np.nan
-                thesemeasurements['Daughter1'] = np.nan
-                thesemeasurements['Daughter2'] = np.nan
+                thesemeasurements['DaughterA'] = np.nan
+                thesemeasurements['DaughterB'] = np.nan
                 thesemeasurements['CentroidX'] = centroidX
                 thesemeasurements['CentroidY'] = centroidY
                 thesemeasurements['Area'] = area
