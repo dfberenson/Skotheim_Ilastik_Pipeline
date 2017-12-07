@@ -4,7 +4,9 @@ Created on Mon Dec 04 19:01:23 2017
 
 @author: dfberenson
 """
-
+import numpy as np
+import pandas as pd
+from skimage import io
 
 class TrackPoint(object):
     
@@ -17,7 +19,9 @@ class TrackPoint(object):
             previous_trackpoint = TrackPoint object for the same Tracked cell in the previous timepoint
         '''
         self.track = track
+        df = track.df
         self.frame = frame
+        self.isLast = self.frame == max(df.index)
         self.previous_trackpoint = previous_trackpoint
         self.next_trackpoint = None
         
@@ -35,8 +39,6 @@ class TrackPoint(object):
         self.isDividing = False  #Will check downstream if should be set to True
         self.daughterA_trackpoint = None
         self.daughterB_trackpoint = None
-        
-        df = track.df
                 
         self.Lineage = df.loc[frame,(self.trackId,'Lineage')]
         self.Mother = df.loc[frame,(self.trackId,'Mother')]
@@ -48,32 +50,63 @@ class TrackPoint(object):
         self.Area = df.loc[frame, (self.trackId,'Area')]
         self.MeanIntensity_Chan1 = df.loc[frame ,(self.trackId,'MeanIntensity_Chan1')]
         self.MeanIntensity_Chan2 = df.loc[frame ,(self.trackId,'MeanIntensity_Chan2')]
+        self.IntegratedIntensity_Chan1 = df.loc[frame ,(self.trackId,'IntegratedIntensity_Chan1')]
+        self.IntegratedIntensity_Chan2 = df.loc[frame ,(self.trackId,'IntegratedIntensity_Chan2')]
         self.CentroidX = df.loc[frame ,(self.trackId,'CentroidX')]
         self.CentroidY = df.loc[frame ,(self.trackId,'CentroidY')]
    
 
     def propagate_trackpoint(self):
-        
-        nextframe = self.frame + 1
-        if nextframe > max(self.track.df.index):
-            print('Trackpoint propagation for track {} terminated at frame {}'.format(self.trackId, self.frame))
+        print('Propagating track {} at frame {}...'.format(self.trackId, self.frame))
+        if self.isLast:
+            #Okay to remove the Print statement but not the return statement!
+            print('Trackpoint propagation for track {} terminated at frame {}.\n'.format(self.trackId, self.frame))
             return
+        nextframe = self.frame + 1
         
         if not self.isDividing:
             self.next_trackpoint = TrackPoint(self.track, nextframe, self)
             self.next_trackpoint.propagate_trackpoint()
         
         if self.isDividing:
+            print('Division event for track {} at frame {}!'.format(self.trackId, self.frame))
+            print('Propagation continues with daughters {} and {}.\n'.format(self.DaughterA, self.DaughterB))
             self.daughterA_trackpoint = TrackPoint(self.track, nextframe, self, isNewborn = True, newTrackId = self.DaughterA)
             self.daughterB_trackpoint = TrackPoint(self.track, nextframe, self, isNewborn = True, newTrackId = self.DaughterB)
             self.daughterA_trackpoint.propagate_trackpoint()
             self.daughterB_trackpoint.propagate_trackpoint()
     
+    def showImage(self):
+        '''
+        Returns (or displays) the ilastik output image (also the raw fluorescence image?) at the current frame, cropped appropriately.
+        May need to have TrackPoints also know their labelId (the otherwise useless piece of info).
+        '''
+        ilastik_image_fpath = self.track.expt.ilastik_image_fpath
+        t = int(self.frame)
+        centX = int(self.CentroidX)
+        centY = int(self.CentroidY)
+        
+        ilastik_stack = io.imread(ilastik_image_fpath)
+        [ilastikT,ilastikY,ilastikX] = ilastik_stack.shape
+        
+        minX = max(0,centX-200)
+        maxX = min(ilastikX,centX+200)
+        minY = max(0,centY-200)
+        maxY = min(ilastikY,centY+200)
+    
+        print(ilastikT,ilastikY,ilastikX)
+        print(t,minY,maxY,minX,maxX)
+        local_image = ilastik_stack[t,minY:maxY,minX:maxX]
+        print(local_image)
+        io.imshow(np.uint8(local_image))
+    
+    
+    '''
     @staticmethod
     def simple_stitch(tp1, tp2):
         tp1.next_trackpoint = tp2
         tp2.previous_trackpoint = tp1
-    
+    '''
     
     def print_details_through_end(self):
         self.print_trackpoint_details()
@@ -99,7 +132,7 @@ class TrackPoint(object):
             print('The previous linked trackpoint is {}'.format(str(self.previous_trackpoint)))
         if self.isDividing:
             print('This cell is dividing.')
-            print('Daughter A trackpoint is {}.'.format(self.daughterA_trackpoint))
-            print('Daughter B trackpoint is {}.'.format(self.daughterB_trackpoint))
+            print('Daughter A trackpoint is {}'.format(self.daughterA_trackpoint))
+            print('Daughter B trackpoint is {}'.format(self.daughterB_trackpoint))
         else:
-            print('The next linked trackpoint is {}.'.format(str(self.next_trackpoint)))
+            print('The next linked trackpoint is {}'.format(str(self.next_trackpoint)))

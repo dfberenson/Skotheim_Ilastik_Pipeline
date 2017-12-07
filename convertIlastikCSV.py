@@ -8,9 +8,10 @@ Created on Wed Nov 29 13:56:56 2017
 import pandas as pd
 import numpy as np
 
-def convertIlastikCsvToDataframe(ilastik_csv_fpath =
+def convertIlastikCsvToDataFrame(ilastik_csv_fpath =
                                  r'C:\Users\Skotheim Lab\Desktop\Ilastik Tracking\TestImage2_SuperMini_NoLearning_Metadata.csv'):
    
+    print('\nReading ilastik Csv...')
     ilastik_csv = pd.read_csv(ilastik_csv_fpath)
     
     all_timepoints = np.unique(ilastik_csv['frame'])
@@ -82,14 +83,15 @@ def convertIlastikCsvToDataframe(ilastik_csv_fpath =
                else:
                    raise ValueError('TrackId {} has {} genuine daughters at frame {}'
                      .format(trackId,num_genuine_daughters,thistrackId_lastframe))
-                           
+    
+    print('ilastik Csv import complete.\n')                     
     return df
 
 
 def getLineageSubtracedDataframe(df, lin):
     '''
     Follow a lineage and return a mini Dataframe of its most distant descendants,
-    with higher rows filled in from the ancestor. Good for easy multigenerational tracing.
+    with higher rows filled in from the ancestor. Tool for easy multigenerational tracing.
     '''
     lineage_boolean_array = df.xs('Lineage',level='measurement',axis=1) == lin
     trackIdnums_list = [None] * len(df.index)

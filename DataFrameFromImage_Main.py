@@ -23,59 +23,59 @@ relabeled_track_path = relabelManualTrack(r'E:\Ilastik Tracking\Tracking_Better.
 print('\nTotal time elapsed (s): ')
 print (int(time.clock() - start_time))
 
-expt = Experiment('Test',tracked_filename = relabeled_track_path)
+df_wrapped = DataFrameFromImages('Test',tracked_filename = relabeled_track_path)
 
 print('\nConstructing data frame...\n')
-expt.construct_dataframe()
+df_wrapped.construct_dataframe()
 print('\nTotal time elapsed (s): ')
 print (int(time.clock() - start_time))
 
-known_df = expt.df
-c = copy.deepcopy(expt)
+known_df = df_wrapped.df
+c = copy.deepcopy(df_wrapped)
 '''
-expt = copy.deepcopy(c)
-expt = Experiment('Test')
-expt.assign_dataframe(known_df)
+df_wrapped = copy.deepcopy(c)
+df_wrapped = DataFrameFromImages('Test')
+df_wrapped.assign_dataframe(known_df)
 '''
 
 print('\nSmoothening channel 1...\n')
-expt.smoothen('NetIntegratedIntensity_Chan1')
+df_wrapped.smoothen('NetIntegratedIntensity_Chan1')
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nSmoothening channel 2...\n')
-expt.smoothen('NetIntegratedIntensity_Chan2')
+df_wrapped.smoothen('NetIntegratedIntensity_Chan2')
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating speed...\n')
-expt.calculate_speed()
+df_wrapped.calculate_speed()
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating neighbors...\n')
-expt.calculate_num_neighbors(100)
+df_wrapped.calculate_num_neighbors(100)
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating derivative...\n')
-expt.calculate_derivative('NetIntegratedIntensity_Chan1')
+df_wrapped.calculate_derivative('NetIntegratedIntensity_Chan1')
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 print('\nCalculating relative derivative...\n')
-expt.calculate_relative_derivative('NetIntegratedIntensity_Chan1')
+df_wrapped.calculate_relative_derivative('NetIntegratedIntensity_Chan1')
 print('Total time elapsed (s): ')
 print (int(time.clock() - start_time))
 
 saved_filename = r'E:\Ilastik Tracking\SavedData.pickle'
 
 with open(saved_filename,'wb') as f:
-    pickle.dump(expt,f)
+    pickle.dump(df_wrapped,f)
 
 '''
 with open(saved_filename,'rb') as f:
-    prev_expt = pickle.load(f)
+    prev_df_wrapped = pickle.load(f)
 '''
 
 """
