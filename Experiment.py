@@ -10,6 +10,7 @@ import pandas as pd
 import pickle, copy
 from convertIlastikCSV import convertIlastikCsvToDataFrame
 from Track import Track
+from TrackGUI import TrackGui
 
 class Experiment(object):
 
@@ -31,18 +32,36 @@ class Experiment(object):
         self.new_df.sort_index(axis = 'columns', inplace = True)
         self.tracks_list = pd.Series(index = self.trackIds_list)
         self.individual_dfs_list = pd.Series(index = self.trackIds_list)
+        
+        self.all_trackpoints = []
 
         for trackId in self.trackIds_list:
             first_frame = min(self.orig_df[~np.isnan(self.orig_df.loc[:,(trackId,'Lineage')])].index)
                 #Using 'Lineage' as an example, find the first frame (index) at which there is a non-NaN value.
             thistrack = Track(self, self.orig_df, trackId, first_frame)
+                #Create and propagate a new Track. Note that if this is the Track for a daughter cell,
+                #it will have its own brand new set of TrackPoints that contain the same info as the mother Track's TrackPoints,
+                #but are different objects and will need to be treated independently. This is possibly not the best way to do it.
             self.tracks_list.loc[trackId] = thistrack
             thistrack_df = thistrack.toDataFrame()   
             self.new_df.loc[thistrack_df.index, thistrack_df.columns] = thistrack_df
 
-        
-        
-        
+    def addTrackpoint(self, trackpoint):
+        self.all_trackpoints.append(trackpoint)
+    
+    def createTrackGui(self, tracknum, first_frame, stack_length):
+        return TrackGui(self, tracknum, first_frame, stack_length)
+    
+    def getMatchingTrackpoints(self, frame, lineage):
+        '''
+        Lineage should perhaps be changed to LabelId as part of a larger overhaul
+        that takes advantage of the information in LabelId
+        '''
+        matching_trackpoints = []
+        for tp in self.all_trackpoints:
+            if tp.frame == frame and tp.Lineage == lineage:
+                matching_trackpoints.append(tp)
+        return matching_trackpoints
         
     @staticmethod
     def areEqualDataFrames(df1, df2):
@@ -69,7 +88,8 @@ o = expt.orig_df
 n = expt.new_df
 print(Experiment.areEqualDataFrames(o,n))
 
-expt.tracks_list[2].init_trackpoint.showImage()
+g = expt.createTrackGui(tracknum = 2, first_frame = 0, stack_length = 4)
+
 
 #saved_filename = r'C:\Users\Skotheim Lab\Desktop\Ilastik Tracking\SavedData.pickle'
 #

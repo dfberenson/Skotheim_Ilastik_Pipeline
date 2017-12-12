@@ -7,6 +7,7 @@ Created on Mon Dec 04 19:01:23 2017
 import numpy as np
 import pandas as pd
 from skimage import io
+import matplotlib.pyplot as plt
 
 class TrackPoint(object):
     
@@ -19,6 +20,8 @@ class TrackPoint(object):
             previous_trackpoint = TrackPoint object for the same Tracked cell in the previous timepoint
         '''
         self.track = track
+        self.expt = self.track.expt
+        self.expt.addTrackpoint(self)
         df = track.df
         self.frame = frame
         self.isLast = self.frame == max(df.index)
@@ -76,30 +79,30 @@ class TrackPoint(object):
             self.daughterA_trackpoint.propagate_trackpoint()
             self.daughterB_trackpoint.propagate_trackpoint()
     
-    def showImage(self):
+    def getImage(self, centX = None, centY = None, show = None):
         '''
         Returns (or displays) the ilastik output image (also the raw fluorescence image?) at the current frame, cropped appropriately.
         May need to have TrackPoints also know their labelId (the otherwise useless piece of info).
         '''
-        ilastik_image_fpath = self.track.expt.ilastik_image_fpath
+        ilastik_image_fpath = self.expt.ilastik_image_fpath
         t = int(self.frame)
-        centX = int(self.CentroidX)
-        centY = int(self.CentroidY)
+        if centX is None:
+            centX = self.CentroidX
+        if centY is None:
+            centY = self.CentroidY
         
         ilastik_stack = io.imread(ilastik_image_fpath)
         [ilastikT,ilastikY,ilastikX] = ilastik_stack.shape
         
-        minX = max(0,centX-200)
-        maxX = min(ilastikX,centX+200)
-        minY = max(0,centY-200)
-        maxY = min(ilastikY,centY+200)
+        minX = int(max(0,centX-200))
+        maxX = int(min(ilastikX,centX+200))
+        minY = int(max(0,centY-200))
+        maxY = int(min(ilastikY,centY+200))
     
-        print(ilastikT,ilastikY,ilastikX)
-        print(t,minY,maxY,minX,maxX)
         local_image = ilastik_stack[t,minY:maxY,minX:maxX]
-        print(local_image)
-        io.imshow(np.uint8(local_image))
-    
+        if show == 'show':
+            plt.imshow(local_image)
+        return local_image
     
     '''
     @staticmethod
@@ -119,10 +122,6 @@ class TrackPoint(object):
             self.daughterB_trackpoint.print_details_through_end()
         else:
             self.next_trackpoint.print_details_through_end()
-        
-                
-    def __str__(self):
-        return 'TrackPoint object from track {} at frame {}.'.format(self.trackId, self.frame)
             
     def print_trackpoint_details(self):
         print('\nTrackPoint object from track {} at frame {}.'.format(self.trackId, self.frame))
@@ -136,3 +135,9 @@ class TrackPoint(object):
             print('Daughter B trackpoint is {}'.format(self.daughterB_trackpoint))
         else:
             print('The next linked trackpoint is {}'.format(str(self.next_trackpoint)))
+
+                    
+    def __str__(self):
+        return '<<TrackPoint object from track {} at frame {}.>>'.format(self.trackId, self.frame)
+    
+    __repr__ = __str__

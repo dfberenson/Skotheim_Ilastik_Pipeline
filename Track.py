@@ -65,14 +65,42 @@ class Track(object):
         
         return new_df
     
-    
+    def getImStack_and_TrackPointStack(self, first_frame, stack_length):
+        '''
+        Starting from init_frame, return an image stack and a list of TrackPoints with length 'length'.
+        Does not work with branched (dividing) tracks.
+        TBD: image should be recolored to highlight the tracked objects.
+        '''
+        stack_first_trackpoint = self.init_trackpoint
+        
+        for i in range(first_frame):
+            stack_first_trackpoint = stack_first_trackpoint.next_trackpoint
+            assert stack_first_trackpoint is not None
+        
+        centX = stack_first_trackpoint.CentroidX
+        centY = stack_first_trackpoint.CentroidY
+        first_img = stack_first_trackpoint.getImage(centX = centX, centY = centY)
+        this_trackpoint = stack_first_trackpoint
+        im_stack = np.array([first_img] * stack_length) #Initialize image stack of right size.
+        trackpoint_stack = [None] * stack_length #Initialize trackpoint stack of right size.
+                           
+        for i in range(stack_length):
+            trackpoint_stack[i] = this_trackpoint
+            this_img = this_trackpoint.getImage(centX = centX, centY = centY)
+            im_stack[i] = this_img
+            this_trackpoint = this_trackpoint.next_trackpoint
+        
+        return (im_stack,trackpoint_stack)
+            
     
     def visualizeStructure(self):
         '''
-        Maybe can do something here to show all the TrackPoints the Track goes through?
+        TBD: maybe can do something here to show all the TrackPoints the Track goes through?
         '''
         pass
     
     
     def __str__(self):
-        return 'Track object with trackId {} starting at frame {} ending at frame {}.'.format(self.trackId, self.init_frame, self.last_frame)
+        return '<<Track object with trackId {} starting at frame {} ending at frame {}.>>'.format(self.trackId, self.init_frame, self.last_frame)
+    
+    __repr__ = __str__

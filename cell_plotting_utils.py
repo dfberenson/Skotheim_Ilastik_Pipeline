@@ -9,6 +9,27 @@ Created on Tue Nov 07 19:12:50 2017
 #And make trace of intensity and area data
 
 
+def show_stack_with_slider(im_stack):
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.widgets import Slider
+    
+    ax = plt.subplot(1,1,1)
+    plt.subplots_adjust(left = 0.25, bottom = 0.25)
+    
+    frame = 0
+    img = plt.imshow(im_stack[frame,:,:])
+    axframe = plt.axes([0.25,0.1,0.6,0.05])
+    slider_frame = Slider(axframe, 'Frame', 0, len(im_stack), valinit = 0)
+    
+    def update(val):
+        frame = np.around(slider_frame.val)
+        img.set_data(im_stack[frame,:,:])
+    
+    slider_frame.on_changed(update)
+    plt.show()
+
 def plot_average_value(dataframe, measurement_name):
     import matplotlib.pyplot as plt
     import pandas as pd
