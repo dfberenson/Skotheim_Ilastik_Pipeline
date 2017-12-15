@@ -11,9 +11,17 @@ import numpy as np
     
 
 class TrackGui(object):
+    '''
+    A TrackGui object is created to handle viewing and interacting with cell tracks in a very local area (in time and space).
+    The parameter i indicates which frame to display and is always used as modulo self.im_length so the stack can be cycled through.
+    The matplotlib.pyplot figure listens for keyboard and mouse input and responds appropriately.
+    ToDo: Make the clicks actually *do* something other than just print information.
+    '''
 
     def __init__(self, expt, tracknum, first_frame, stack_length):
-        
+        '''
+        Displays the first frame of the mini image stack, then connects to the keyboard and mouse.
+        '''
         TrackGui.printInstructions()
         
         self.expt = expt
@@ -23,6 +31,7 @@ class TrackGui(object):
         
         self.thistrack = self.expt.tracks_list[self.tracknum]
         self.im_stack, self.trackpoint_stack = self.thistrack.getImStack_and_TrackPointStack(self.first_frame, self.stack_length)
+            #Only the self.im_stack output is actually used.
         
         self.im_length = len(self.im_stack)
         self.i = 0
@@ -34,11 +43,17 @@ class TrackGui(object):
         
         
     def connect(self):
+        '''
+        Tells the figure canvas to listen for the appropriate events.
+        '''
         self.cidpress = self.fig.canvas.mpl_connect('button_press_event', self.on_press)
         self.cidscroll = self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
         self.cidkey = self.fig.canvas.mpl_connect('key_press_event', self.on_key)
 
     def on_key(self,event):
+        '''
+        Move through time using 'a' and 'd' keys.
+        '''
         if event.key == 'd':
             self.i += 1        
         elif event.key == 'a':
@@ -49,6 +64,9 @@ class TrackGui(object):
         plt.draw()
 
     def on_scroll(self,event):
+        '''
+        Move through time by scrolling mouse wheel.
+        '''
         if event.button == 'down':
             self.i += 1        
         elif event.button == 'up':
@@ -59,6 +77,11 @@ class TrackGui(object):
         plt.draw()
 
     def on_press(self, event):
+        '''
+        On left click: print the TrackPoints corresponding to the clicked cell.
+        On right click: set the clicked cell's value to 1 and all other cells to 0.
+        '''
+        
 #        print('you pressed', event.button, event.xdata, event.ydata)    
         if event.button == 1:
             print('Found the following trackpoints corresponding to your click:')
@@ -81,6 +104,11 @@ class TrackGui(object):
         plt.draw()
         
     def getClickedTrackPoints(self,x,y):
+        '''
+        Using x- and y-coordinates of the click, find the lineage of the selected cell.
+        Then find the TrackPoints matching the current frame and selected lineage, using the Experiment.getMatchingTrackpoints method.        
+        TBD: Compare based on labelId rather than lineageId.
+        '''
         frame = self.i % self.im_length
         lineage = self.im_stack[frame,y,x]   #Should perhaps become LabelId as part of larger overhaul
         matching_tps = self.expt.getMatchingTrackpoints(frame = frame, lineage = lineage)
@@ -91,28 +119,3 @@ class TrackGui(object):
         print('\n\n\n\n\n')
         print('Scroll to travel through stack.')
         print('Right-click cell to label it.')
-    
-        
-#g = TrackGui(im_stack)
-
-'''
-import matplotlib.pyplot as plt
-import numpy as np
-
-#im_stack = np.array([np.array([[1,2],[3,4]]),np.array([[8,7],[6,5]])])
-frames = len(im_stack)
-
-def on_press(event):
-    print('you pressed', event.button, event.xdata, event.ydata)
-    global x
-    x = x + 1
-    plt.cla()
-    ax.imshow(im_stack[x%frames])
-    plt.draw()
-
-fig,ax = plt.subplots()
-x = 0
-ax.imshow(im_stack[x])
-cid = fig.canvas.mpl_connect('button_press_event', on_press)
-plt.draw()
-'''

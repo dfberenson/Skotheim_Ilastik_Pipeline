@@ -10,7 +10,9 @@ Created on Tue Nov 07 19:12:50 2017
 
 
 def show_stack_with_slider(im_stack):
-
+    '''
+    Display an image stack with a Slider widget to scroll through it.
+    '''
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib.widgets import Slider
@@ -31,6 +33,10 @@ def show_stack_with_slider(im_stack):
     plt.show()
 
 def plot_average_value(dataframe, measurement_name):
+    '''
+    Average a given measurement across all cells at each timepoint,
+    then plot it over time.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -46,7 +52,9 @@ def plot_average_value(dataframe, measurement_name):
     plt.show()
 
 def plot_track_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
-    #cellnum is int so only one cell
+    '''
+    Plot the motion of a single cell's centroid from a DataFrame, from an image with size xlim x ylim.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -69,7 +77,9 @@ def plot_track_centroid_motion(cellnum, dataframe, xlim = 2560, ylim = 2160):
     plt.gca().invert_yaxis()
     
 def plot_tracks_centroids_motions(cellnums, dataframe, xlim = 2560, ylim = 2160):
-    #cellnums is list so multiple cells
+    '''
+    Plot the motion of several cells' centroids from a DataFrame, from an image with size xlim x ylim.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -97,7 +107,10 @@ def plot_tracks_centroids_motions(cellnums, dataframe, xlim = 2560, ylim = 2160)
         plt.scatter(xcoords[n],ycoords[n], c=times)
     plt.gca().invert_yaxis()
     
-def plot_intensity(cellnum, dataframe, ylim = None):
+def plot_intensity(cellnum, dataframe):
+    '''
+    Plot the intensities for Chan1 and Chan2 from a DataFrame on the same plot using two differently-scaled y axes.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -121,6 +134,9 @@ def plot_intensity(cellnum, dataframe, ylim = None):
 
 
 def plot_variable(cellnum, dataframe, measurement_name):
+    '''
+    Plot a single variable from a DataFrame.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
@@ -134,6 +150,9 @@ def plot_variable(cellnum, dataframe, measurement_name):
     
     
 def compare_area_with_intensity(dataframe):
+    '''
+    Plot cells' Chan1 and Chan2 intensity versus area (one data point per cell per timepoint) from a DataFrame.
+    '''
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
